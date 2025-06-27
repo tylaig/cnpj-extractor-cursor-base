@@ -1,0 +1,9 @@
+# Node
+node_modules/
+.env
+uploads/
+temp_*.csv
+*.log
+# Sistema
+.DS_Store
+Thumbs.db

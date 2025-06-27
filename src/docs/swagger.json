@@ -1,0 +1,79 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CNPJ Extractor API",
+    "version": "1.0.0",
+    "description": "API para upload e consulta de dados públicos de CNPJ da Receita Federal."
+  },
+  "servers": [
+    { "url": "http://localhost:3000/api" }
+  ],
+  "paths": {
+    "/upload": {
+      "post": {
+        "summary": "Upload de arquivo ZIP da Receita Federal",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Arquivo processado e dados inseridos com sucesso"
+          },
+          "400": { "description": "Erro de validação ou arquivo inválido" },
+          "500": { "description": "Erro interno" }
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "summary": "Busca de empresas com múltiplos filtros",
+        "parameters": [
+          { "name": "cnae", "in": "query", "schema": { "type": "string" }, "description": "Códigos CNAE separados por vírgula" },
+          { "name": "cidade", "in": "query", "schema": { "type": "string" }, "description": "Nomes de cidades separados por vírgula" },
+          { "name": "uf", "in": "query", "schema": { "type": "string" }, "description": "UFs separados por vírgula" },
+          { "name": "razao_social", "in": "query", "schema": { "type": "string" }, "description": "Razões sociais (parcial) separadas por vírgula" },
+          { "name": "situacao_cadastral", "in": "query", "schema": { "type": "string" }, "description": "Situações separadas por vírgula" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 }, "description": "Página" },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 }, "description": "Limite por página" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de empresas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "array", "items": { "type": "object" } },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": { "type": "integer" },
+                        "limit": { "type": "integer" },
+                        "total": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "description": "Erro interno" }
+        }
+      }
+    }
+  }
+}
