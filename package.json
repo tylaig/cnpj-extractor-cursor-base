@@ -5,7 +5,7 @@
   "main": "src/api/index.js",
   "scripts": {
     "dev": "nodemon src/api/index.js",
-    "start": "node src/api/index.js"
+    "dev:all": "concurrently \"npm run dev\" \"cd src/frontend && npm install && npm run dev\""
   },
   "keywords": ["CNPJ", "Receita Federal", "API", "PostgreSQL"],
   "author": "",
@@ -20,6 +20,7 @@
     "swagger-ui-express": "^4.6.3"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "concurrently": "^8.2.0"
   }
 }

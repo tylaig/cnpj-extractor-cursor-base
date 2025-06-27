@@ -29,3 +29,14 @@ CREATE TABLE IF NOT EXISTS empresas (
 CREATE INDEX IF NOT EXISTS idx_empresas_cnae ON empresas(cnae_principal);
 CREATE INDEX IF NOT EXISTS idx_empresas_cidade ON empresas(cidade_id);
 CREATE INDEX IF NOT EXISTS idx_empresas_razao ON empresas(razao_social);
+-- ... código existente ...
+
+-- Tabela para controle de tarefas de sincronização
+CREATE TABLE IF NOT EXISTS sync_tasks (
+    id SERIAL PRIMARY KEY,
+    status VARCHAR(30) NOT NULL DEFAULT 'aguardando', -- aguardando, processando, finalizado, erro
+    progress INTEGER NOT NULL DEFAULT 0, -- 0 a 100
+    log TEXT DEFAULT '',
+    started_at TIMESTAMP DEFAULT NOW(),
+    finished_at TIMESTAMP
+);
