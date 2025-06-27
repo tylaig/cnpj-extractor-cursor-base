@@ -2,38 +2,100 @@
   "openapi": "3.0.0",
   "info": {
     "title": "CNPJ Extractor API",
-    "version": "1.0.0",
-    "description": "API para upload e consulta de dados públicos de CNPJ da Receita Federal."
+    "version": "1.1.0",
+    "description": "API para upload, sincronização e consulta de dados públicos de CNPJ da Receita Federal. Sincronização é assíncrona, com barra de progresso e logs."
   },
   "servers": [
     { "url": "http://localhost:3000/api" }
   ],
   "paths": {
-    "/upload": {
-      "post": {
-        "summary": "Upload de arquivo ZIP da Receita Federal",
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                },
-                "required": ["file"]
+    "/receita/status": {
+      "get": {
+        "summary": "Status dos arquivos da Receita Federal na pasta arquivos-receita",
+        "responses": {
+          "200": {
+            "description": "Status dos arquivos",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" },
+                "example": {
+                  "totalEsperados": 36,
+                  "totalPresentes": 36,
+                  "totalAusentes": 0,
+                  "totalDivergentes": 0,
+                  "presentes": ["Empresas0.zip", "Empresas1.zip", "..."],
+                  "ausentes": [],
+                  "divergentes": []
+                }
               }
             }
           }
-        },
+        }
+      }
+    },
+    "/receita/sync": {
+      "post": {
+        "summary": "Inicia a sincronização completa dos dados da Receita Federal (assíncrona)",
         "responses": {
           "200": {
-            "description": "Arquivo processado e dados inseridos com sucesso"
-          },
-          "400": { "description": "Erro de validação ou arquivo inválido" },
-          "500": { "description": "Erro interno" }
+            "description": "Tarefa de sincronização iniciada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "task_id": { "type": "integer" }
+                  }
+                },
+                "example": { "task_id": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/receita/sync/status/{task_id}": {
+      "get": {
+        "summary": "Consulta o status da tarefa de sincronização",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status da tarefa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "task_id": { "type": "integer" },
+                    "status": { "type": "string" },
+                    "progress": { "type": "integer" },
+                    "log": { "type": "array", "items": { "type": "string" } },
+                    "started_at": { "type": "string" },
+                    "finished_at": { "type": "string" }
+                  }
+                },
+                "example": {
+                  "task_id": 1,
+                  "status": "processando",
+                  "progress": 42,
+                  "log": [
+                    "Iniciando sincronização...",
+                    "Limpando banco...",
+                    "Processando Empresas0.zip..."
+                  ],
+                  "started_at": "2024-05-01T12:00:00Z",
+                  "finished_at": null
+                }
+              }
+            }
+          }
         }
       }
     },

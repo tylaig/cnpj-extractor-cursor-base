@@ -5,7 +5,7 @@
   "main": "src/api/index.js",
   "scripts": {
     "dev": "nodemon src/api/index.js",
-    "dev:all": "concurrently \"npm run dev\" \"cd src/frontend && npm install && npm run dev\""
+    "dev:all": "concurrently \"npm run dev --host\" \"cd src/frontend && npm install && npm run dev --host\""
   },
   "keywords": ["CNPJ", "Receita Federal", "API", "PostgreSQL"],
   "author": "",
