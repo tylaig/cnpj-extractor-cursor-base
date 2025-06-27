@@ -5,107 +5,98 @@ API web para processamento, carga e consulta de dados públicos de CNPJ da Recei
 ## Visão Geral
 
 Este serviço permite:
-- Upload de arquivos ZIP da Receita Federal
+- Upload e sincronização de arquivos ZIP da Receita Federal
 - Extração, validação e carga em massa dos dados para PostgreSQL
 - Consulta via API REST com filtros avançados (CNAE, cidade, nome, UF, etc)
-- Documentação interativa e customizada
+- Dashboard web para controle e acompanhamento da sincronização
+- Documentação interativa e customizada (Swagger)
 
 ## Estrutura do Projeto
 
 ```
 /cnpj-extractor-cursor-base
 │
+├── arquivos-receita/         # Coloque aqui todos os arquivos ZIP da Receita Federal
 ├── src/
-│   ├── api/                # Endpoints REST
-│   ├── services/           # Lógica de negócio (parsing, validação, carga)
-│   ├── db/                 # Scripts e modelos do banco de dados
-│   ├── utils/              # Funções utilitárias (extração ZIP, etc)
-│   ├── config/             # Configurações (env, conexões)
-│   └── docs/               # Documentação customizada da API
-│
-├── public/                 # Assets estáticos (ex: logo, docs custom)
-├── .env                    # Variáveis de ambiente
+│   ├── api/                  # Endpoints REST
+│   ├── config/               # Configurações (env, conexões)
+│   ├── db/                   # Scripts e modelos do banco de dados
+│   ├── docs/                 # Documentação customizada da API
+│   ├── frontend/             # Frontend React (dashboard)
+│   ├── services/             # Lógica de negócio (parsing, sync, validação, carga)
+│   └── utils/                # Funções utilitárias
+├── public/                   # Assets estáticos (ex: logo, docs custom)
+├── .env                      # Variáveis de ambiente
+├── .env.example              # Exemplo de configuração
+├── .gitignore
 ├── package.json
 └── README.md
 ```
 
-## Endpoints Principais
+## Como rodar o projeto
 
-### 1. Upload de Arquivo ZIP
-- `POST /api/upload`
-- Upload de arquivo ZIP contendo os dados da Receita Federal.
+1. **Clone o repositório e entre na pasta:**
+   ```bash
+   git clone ...
+   cd cnpj-extractor-cursor-base
+   ```
 
-### 2. Consulta de Empresas
-- `GET /api/empresas`
-- Filtros: cnae, cidade, nome, uf, situação, etc.
-- Paginação: `?page=1&limit=50`
+2. **Coloque todos os arquivos ZIP da Receita Federal na pasta:**
+   ```
+   arquivos-receita/
+   ```
 
-### 3. Consulta de CNAEs
-- `GET /api/cnaes`
-- Lista e busca de códigos CNAE.
-
-### 4. Consulta de Cidades
-- `GET /api/cidades`
-- Lista e busca de cidades.
-
-## Exemplo de Resposta
-
-```json
-{
-  "data": [
-    {
-      "cnpj": "12345678000195",
-      "razao_social": "EMPRESA EXEMPLO LTDA",
-      "nome_fantasia": "EXEMPLO",
-      "cnae_principal": "6201-5/01",
-      "cidade": "SÃO PAULO",
-      "uf": "SP",
-      "situacao_cadastral": "ATIVA"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 50,
-    "total": 1000
-  }
-}
-```
-
-## Filtros Disponíveis
-
-- `cnae` (ex: 6201-5/01)
-- `cidade` (ex: SÃO PAULO)
-- `uf` (ex: SP)
-- `razao_social` (busca parcial)
-- `situacao_cadastral` (ATIVA, BAIXADA, etc)
-
-## Estilo da Documentação
-
-- **Cores:**  
-  - Primária: #1B4F72  
-  - Secundária: #28B463  
-  - Fundo: #F8F9FA  
-  - Texto: #2C3E50  
-  - Acento: #F39C12  
-  - Sucesso: #27AE60  
-- **Fonte:** Roboto ou Source Sans Pro
-- **Layout:** Tabs para endpoints, exemplos de requisição/resposta, parâmetros bem descritos.
-
----
-
-## Como rodar o projeto (instruções iniciais)
-
-1. Instale as dependências:
+3. **Instale as dependências (backend e frontend):**
    ```bash
    npm install
    ```
-2. Configure o arquivo `.env` com as variáveis do PostgreSQL
-3. Inicie o servidor:
-   ```bash
-   npm run dev
-   ```
 
----
+4. **Configure o arquivo `.env` com as variáveis do PostgreSQL (veja `.env.example`):**
+
+5. **Suba o backend e o frontend juntos:**
+   ```bash
+   npm run dev:all
+   ```
+   - O backend ficará disponível em `http://localhost:3000`
+   - O frontend (dashboard) ficará disponível em `http://localhost:5173`
+
+## Dashboard de Sincronização
+
+- Acesse `http://localhost:5173` para:
+  - Verificar status dos arquivos da Receita Federal
+  - Iniciar a sincronização completa do banco de dados
+  - Acompanhar barra de progresso e logs em tempo real
+
+## Endpoints Principais
+
+### 1. Status dos Arquivos
+- `GET /api/receita/status`
+- Retorna status dos arquivos ZIP esperados na pasta `arquivos-receita`
+
+### 2. Sincronização Completa
+- `POST /api/receita/sync`
+  - Inicia uma tarefa de sincronização assíncrona
+  - Retorna `task_id`
+- `GET /api/receita/sync/status/:task_id`
+  - Consulta status, progresso e logs da tarefa
+
+### 3. Consulta de Empresas
+- `GET /api/search?cnae=...&cidade=...&uf=...&razao_social=...&situacao_cadastral=...&page=1&limit=50`
+- Filtros dinâmicos, múltiplos valores por vírgula
+
+## Documentação Interativa
+- Acesse `http://localhost:3000/api/docs` para ver e testar todos os endpoints (Swagger UI customizado)
+
+## Scripts Úteis
+
+- `npm run dev:all` — Sobe backend e frontend juntos (ideal para desenvolvimento)
+- `npm run dev` — Sobe apenas o backend
+- `cd src/frontend && npm run dev` — Sobe apenas o frontend
+
+## Observações
+- Todos os arquivos ZIP devem estar em `arquivos-receita/` antes de sincronizar.
+- O processo de sincronização é assíncrono, com barra de progresso e logs no dashboard.
+- O banco de dados será limpo e reimportado a cada sincronização.
 
 ## Licença
 MIT
